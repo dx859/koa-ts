@@ -1,0 +1,23 @@
+{
+  "name": "koa-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tsc": "tsc",
+    "watch": "tsc --watch",
+    "start": "nodemon dist/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "koa": "^2.11.0",
+    "koa-body": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/koa__router": "^8.0.2",
+    "@types/koa": "^2.11.3"
+  }
+}
