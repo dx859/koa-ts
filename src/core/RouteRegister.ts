@@ -3,18 +3,21 @@ import { formatPathSlash } from '../utils/common';
 
 const router = new Router();
 
-const middlewares = Symbol('middlewares');
+const pathkeys = Symbol('middlewares');
 
 export function Controller(prefix: string) {
   return function <T extends { new (...args: any[]): {} }>(constructor: T) {
-    let pathMap: LooseObject = constructor.prototype[middlewares]
-      ? constructor.prototype[middlewares]
-      : {};
+    let paths: Array<string> = constructor.prototype[pathkeys]
+      ? constructor.prototype[pathkeys]
+      : [];
 
-    for (let key in pathMap) {
-      let [method, path] = key.split(' ');
+    for (let key of paths) {
+      let [method, path, funcKey] = key.split(' ');
       path = formatPathSlash(prefix) + formatPathSlash(path);
-      router[method](path, ...pathMap[key]);
+      let funcs = constructor.prototype[funcKey];
+      funcs = Array.isArray(funcs) ? funcs : [funcs];
+
+      router[method](path, ...funcs);
     }
   };
 }
@@ -26,12 +29,13 @@ function Method(method: 'get' | 'post' | 'all' = 'get') {
       propertyKey: string,
       descriptor: PropertyDescriptor,
     ) {
-      target[middlewares] = target[middlewares] ? target[middlewares] : {};
-      if (target[middlewares][propertyKey]) {
-        target[middlewares][method + ' ' + path].push(target[propertyKey]);
-      } else {
-        target[middlewares][method + ' ' + path] = [target[propertyKey]];
-      }
+      target[pathkeys] = target[pathkeys] ? target[pathkeys] : [];
+
+      target[pathkeys].push(
+        method + ' ' + formatPathSlash(path) + ' ' + propertyKey,
+      );
+
+      return descriptor;
     };
   };
 }
